@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "CATalunya": {
+      "commandName": "Project",
+      "commandLineArgs": "HELP.bin"
+    }
+  }
+}
