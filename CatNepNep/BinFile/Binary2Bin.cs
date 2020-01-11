@@ -99,12 +99,12 @@ namespace CatNepNep.BinFile
             for (var i = 0; i < Result.Count; i++)
             {
                 Reader.Stream.Position = Result.Positions[i]; //Go to the string position
-                Result.Text[i] = Reader.ReadString(GetLength()); //Read the string
+                Result.Text[i] = Reader.ReadString(GetLength(Reader)); //Read the string
 
                 if (Result.Type == 2)
                 {
                     Reader.Stream.Position = Result.Id[i]; //Go to the string id position
-                    Result.TextId[i] = Reader.ReadString(GetLength()); //Read the string id
+                    Result.TextId[i] = Reader.ReadString(GetLength(Reader)); //Read the string id
                 }
 
             }
@@ -115,23 +115,23 @@ namespace CatNepNep.BinFile
         /// <summary>
         /// Return the length of the string
         /// </summary>
-        private int GetLength()
+        public static int GetLength(DataReader reader)
         {
             //Initialize the length 
             int length = 0;
             //Save the current position from the reader
-            Reader.Stream.PushCurrentPosition();
+            reader.Stream.PushCurrentPosition();
             //Read the current byte
-            byte bit = Reader.ReadByte();
+            byte bit = reader.ReadByte();
             //Read the length of the string
             while (bit != 0)
             {
-                bit = Reader.ReadByte();
+                bit = reader.ReadByte();
                 length++;
             }
 
             //Return to the previous position
-            Reader.Stream.PopPosition();
+            reader.Stream.PopPosition();
             //Return the length
             return length;
         }

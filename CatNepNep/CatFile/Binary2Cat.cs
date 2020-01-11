@@ -18,6 +18,7 @@
 
 using System.IO;
 using System.Text;
+using CatNepNep.BinFile;
 using CatNepNep.Exceptions;
 using Yarhl.FileFormat;
 using Yarhl.IO;
@@ -43,7 +44,7 @@ namespace CatNepNep.CatFile
             Result.HeaderTwoSize = Reader.ReadUInt32(); //Read the size of Header Two
 
             CheckCatType();
-            ReadBlocksInformation();
+            
 
             return Result;
         }
@@ -55,9 +56,14 @@ namespace CatNepNep.CatFile
             {
                 case 1:
                     CheckNames();
+                    ReadBlocksInformation(false);
                     break;
 
                 case 3:
+                    ReadHeaderTwoType1(false);
+                    GetBlocks(false);
+                    ReadBlocksInformation(true);
+                    break;
                 case 2:
                 default:
                     throw new CatNotSupported();
@@ -99,7 +105,7 @@ namespace CatNepNep.CatFile
             Result.NumberOfEntries = Reader.ReadUInt32();
         }
 
-        private void ReadBlocksInformation()
+        private void ReadBlocksInformation(bool type3)
         {
             //Go to the pointers block
             Reader.Stream.Position = Result.HeaderTwoSize + 0x14;
@@ -108,20 +114,44 @@ namespace CatNepNep.CatFile
             Result.Positions = new uint[Result.NumberOfEntries];
             Result.Sizes = new uint[Result.NumberOfEntries];
             Result.Blocks = new byte[Result.NumberOfEntries][];
+            var count = 2;
+            if (type3)
+            {
+                Result.Names = new string[Result.NumberOfEntries];
+                Result.NamesPositions = new uint[Result.NumberOfEntries];
+                count = 4;
+            }
 
             //Start the dump
-            for (var e = 0; e < 3; e++)
+            for (var e = 0; e < count; e++)
             {
                 for (var i = 0; i < Result.NumberOfEntries; i++)
                 {
-                    if (e == 0) Result.Positions[i] = Reader.ReadUInt32() + Result.HeaderTwoSize; //Dump the positions
-                    else if (e == 1) Result.Sizes[i] = Reader.ReadUInt32(); //Dump the sizes
-                    else //Read the blocks
+                    switch (e)
                     {
-                        Reader.Stream.Position = Result.Positions[i];
-                        Result.Blocks[i] = Reader.ReadBytes((int)Result.Sizes[i]);
+                        case 0:
+                            Result.Positions[i] = Reader.ReadUInt32() + Result.HeaderTwoSize; //Dump the positions
+                            break;
+                        case 1:
+                            Result.Sizes[i] = Reader.ReadUInt32(); //Dump the sizes
+                            break;
+                        case 2:
+                            Result.NamesPositions[i] = Reader.ReadUInt32() + Result.HeaderTwoSize; //Dump the name position
+                            break;
+                        //Read the blocks
+                        default:
+                            Reader.Stream.Position = Result.NamesPositions[i];
+                            Result.Names[i] = Reader.ReadString(Binary2Bin.GetLength(Reader));
+                            break;
                     }
                 }
+            }
+
+            //Read the arrays
+            for (var i = 0; i < Result.NumberOfEntries; i++)
+            {
+                Reader.Stream.Position = Result.Positions[i];
+                Result.Blocks[i] = Reader.ReadBytes((int)Result.Sizes[i]);
             }
         }
 
@@ -152,7 +182,7 @@ namespace CatNepNep.CatFile
 
             for (var i = 0; i < Result.NumberOfEntries; i++)
             {
-                Result.Names[i] = Reader.ReadString((int)Result.SizeNameChain, Encoding.UTF8).Replace("\0", "");
+                Result.Names[i] = Reader.ReadString((int)Result.SizeNameChain, Encoding.UTF8).Replace("\0", "") + ".bin";
             }
         }
 

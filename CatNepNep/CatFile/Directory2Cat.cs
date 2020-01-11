@@ -59,9 +59,18 @@ namespace CatNepNep.CatFile
 
             CatNode.Blocks = new byte[CatNode.NumberOfEntries][];
 
+            if (CatNode.HeaderType == 3) CatNode.Names = new string[CatNode.NumberOfEntries];
+
             for(var i = 0; i < CatNode.NumberOfEntries; i++)
             {
-                CatNode.Blocks[i] = File.ReadAllBytes(Directory + Path.DirectorySeparatorChar + info[i + 4]);
+                var name = info[i + 4];
+
+                if (!File.Exists(Directory + Path.DirectorySeparatorChar + name)) throw new CatFolderDamaged();
+                if (CatNode.HeaderType == 3) CatNode.Names[i] = name;
+                var nameNew = Path.GetFileNameWithoutExtension(name) + "_new" + Path.GetExtension(name);
+                CatNode.Blocks[i] = File.Exists(Directory + Path.DirectorySeparatorChar + nameNew)
+                    ? File.ReadAllBytes(Directory + Path.DirectorySeparatorChar + nameNew)
+                    : File.ReadAllBytes(Directory + Path.DirectorySeparatorChar + name);
             }
         }
 

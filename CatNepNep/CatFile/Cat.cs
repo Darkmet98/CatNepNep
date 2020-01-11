@@ -71,6 +71,8 @@ namespace CatNepNep.CatFile
         public uint[] Sizes { get; set; }
         public byte[][] Blocks { get; set; }
         public string[] Names { get; set; }
+        //Only for Cat Type 3
+        public uint[] NamesPositions { get; set; }
         public byte[] HeaderBlock { get; set; }
         public byte[] NamesBlock { get; set; }
     }

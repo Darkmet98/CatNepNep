@@ -36,7 +36,7 @@ namespace CatNepNep.CatFile
 
             for (int i = 0; i < source.NumberOfEntries; i++)
             {
-                var name = ((source.Names == null) ? i.ToString().PadLeft(5, '0') : source.Names[i]) + ".bin";
+                var name = ((source.Names == null) ? i.ToString().PadLeft(5, '0') + ".bin" : source.Names[i]);
                 child = NodeFactory.FromMemory(name);
                 child.Stream.Write(source.Blocks[i], 0, source.Blocks[i].Length);
                 container.Root.Add(child);

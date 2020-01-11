@@ -15,6 +15,8 @@
 // You should have received a copy of the GNU General Public License
 // along with CatNepNep. If not, see <http://www.gnu.org/licenses/>.
 //
+
+using System;
 using Yarhl.FileFormat;
 using Yarhl.IO;
 
@@ -48,11 +50,25 @@ namespace CatNepNep.CatFile
 
         private void GeneratePointerZone()
         {
-            //Generate the pointer zone
-            Writer.WriteTimes(0, 8*(Cat.NumberOfEntries+1));
+            //Number of repetitions
+            var count = 2;
 
             //Initialize the array
             Cat.Positions = new uint[Cat.NumberOfEntries];
+            if (Cat.HeaderType == 3)
+            {
+                count++;
+                Cat.NamesPositions = new uint[Cat.NumberOfEntries];
+            }
+
+            //Generate the pointer zone
+
+            //Padding
+            Writer.WriteTimes(0, 4);
+            //Content
+            Writer.WriteTimes(0, (4*count)*Cat.NumberOfEntries);
+            //Padding
+            Writer.WriteTimes(0, 4);
 
             //Write the files and get the positions
             for (var i = 0; i < Cat.NumberOfEntries; i++)
@@ -60,15 +76,33 @@ namespace CatNepNep.CatFile
                 Cat.Positions[i] = (uint)Writer.Stream.Position - Cat.HeaderTwoSize;
                 Writer.Write(Cat.Blocks[i]);
                 Writer.WritePadding(0x00, 0x10);
+                if (Cat.HeaderType == 3)
+                {
+                    Cat.NamesPositions[i] = (uint)Writer.Stream.Position - Cat.HeaderTwoSize;
+                    Writer.Write(Cat.Names[i]);
+                    Writer.WritePadding(0x00, 0x10);
+                }
             }
 
             //Go again to the pointer zone and write the info
             Writer.Stream.Position = Cat.HeaderTwoSize + 0x14;
-            for (var e = 0; e < 2; e++)
+            for (var e = 0; e < count; e++)
             {
                 for (var i = 0; i < Cat.NumberOfEntries; i++)
                 {
-                    Writer.Write(e == 0 ? Cat.Positions[i] : Cat.Sizes[i]);
+                    switch (e)
+                    {
+                        case 0:
+                            Writer.Write(Cat.Positions[i]);
+                            break;
+                        case 1:
+                            Writer.Write(Cat.Sizes[i]);
+                            break;
+                        default:
+                            Writer.Write(Cat.NamesPositions[i]);
+                            break;
+                    }
+                    
                 }
             }
         }
@@ -78,6 +112,7 @@ namespace CatNepNep.CatFile
             switch (Cat.HeaderType)
             {
                 case 1:
+                case 3:
                     int length = (int)Writer.Stream.Length;
                     if (Cat.HasNames == 2)
                     {
@@ -93,12 +128,7 @@ namespace CatNepNep.CatFile
                     break;
 
                 case 2:
-                    //???
-                    break;
-
-                case 3:
-                    //TODO
-                    break;
+                    throw new NotImplementedException();
             }
         }
     }

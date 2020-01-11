@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2019 Pedro Garau Martínez
+﻿// Copyright (C) 2020 Pedro Garau Martínez
 //
 // This file is part of CatNepNep.
 //
@@ -20,10 +20,10 @@ using System;
 namespace CatNepNep.Exceptions
 {
     [Serializable]
-    class FileNotSupported : Exception
+    class CatFolderDamaged : Exception
     {
-        public FileNotSupported()
-            : base("Error, CatNepNep don't work for now with this filetype, please check the compatibility list.")
+        public CatFolderDamaged()
+            : base("Error, this Cat folder is damaged.")
         {
         }
     }
