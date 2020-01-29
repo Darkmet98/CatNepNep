@@ -18,11 +18,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using Yarhl.FileFormat;
 using Yarhl.IO;
 using Yarhl.Media.Text;
+using TextWriter = Yarhl.IO.TextWriter;
 
 namespace CatNepNep.BinFile
 {
@@ -39,12 +41,19 @@ namespace CatNepNep.BinFile
 
             if(File.Exists("Dictionary.map")) GenerateDictionary("Dictionary.map");
 
+            Po = source;
+            
+            if (Po.Header.Extensions["Type"] == "3")
+            {
+                return new BinaryFormat(WriteTxt());
+            }
+
             Writer = new DataWriter(new DataStream())
             {
                 DefaultEncoding = Encoding.GetEncoding("shift_jis"),
                 Endianness = EndiannessMode.LittleEndian,
             };
-            Po = source;
+
             //Write a blank header
             Writer.WriteUntilLength(0, (8 * source.Entries.Count) + 4);
             Writer.Stream.Position = 0;
@@ -52,8 +61,10 @@ namespace CatNepNep.BinFile
             Writer.Write((int)source.Entries.Count);
             //Write the content
             WriteContent();
-
             return new BinaryFormat(Writer.Stream);
+
+
+
         }
 
         private void WriteContent()
@@ -103,13 +114,32 @@ namespace CatNepNep.BinFile
                 Po.Entries[position].Original : Po.Entries[position].Translated;
 
             if (Dictionary == null) return result != "<!null>" ? result : " ";
-            
+
+            return ReplaceText(result);
+        }
+
+        private string ReplaceText(string line)
+        {
+            string result = line;
             foreach (var replace in Dictionary)
             {
                 result = result.Replace(replace.Key, replace.Value);
             }
 
             return result;
+        }
+
+        private DataStream WriteTxt()
+        {
+            TextWriter writer = new TextWriter(new DataStream(), Encoding.GetEncoding("shift_jis"))
+            {
+                NewLine = "\r\n"
+            };
+            foreach (var entry in Po.Entries)
+            {
+                writer.WriteLine("{" + (!string.IsNullOrEmpty(entry.Translated)?ReplaceText(entry.Translated):entry.Original) + "}\r\n");
+            }
+            return writer.Stream;
         }
 
         public void GenerateDictionary(string file)

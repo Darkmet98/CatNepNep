@@ -21,6 +21,7 @@ using System.IO;
 using CatNepNep.BinFile;
 using CatNepNep.CatFile;
 using CatNepNep.Exceptions;
+using CatNepNep.TxtFile;
 using Yarhl.FileFormat;
 using Yarhl.FileSystem;
 using Yarhl.Media.Text;
@@ -57,11 +58,12 @@ namespace CatNepNep
             var name = Path.GetFileNameWithoutExtension(file);
             var nod = NodeFactory.FromFile(file); //BinaryFormat
             Node nodPo;
+            Console.WriteLine(@"Exporting " + file + @"...");
 
             switch (Path.GetExtension(file).ToUpper())
             {
                 case ".BIN":
-                    Console.WriteLine(@"Exporting " + file + @"...");
+                    
                     IConverter<BinaryFormat, Bin> sldConverter = new Binary2Bin();
                     var nodoScript = nod.Transform(sldConverter);
 
@@ -71,11 +73,10 @@ namespace CatNepNep
                     break;
 
                 case ".PO":
-                    Console.WriteLine(@"Exporting " + file + @"...");
                     var po = new Po2BinaryFormat();
                     nod.Transform<Po2Binary, BinaryFormat, Po>();
                     nodPo = nod.Transform(po);
-                    nodPo.Stream.WriteTo(name + "_new.bin");
+                    nodPo.Stream.WriteTo(name.Contains("_txt") ? name.Replace("_txt", "")+"_new.TXT":name+"_new.bin");
                     break;
                 case ".CAT":
                     var cat = new Binary2Cat();
@@ -83,8 +84,6 @@ namespace CatNepNep
                     
                     var containerConverter = new Cat2NodeContainer();
                     var nodContainer = nodCat.Transform(containerConverter);
-
-                    Console.WriteLine(@"Exporting " + name + @"...");
                     if (!Directory.Exists(name)) Directory.CreateDirectory(name ?? throw new Exception("That's not supposed to throw a exception lol, please make a issue if you read this line."));
 
                     foreach (var child in Navigator.IterateNodes(nodContainer))
@@ -95,6 +94,11 @@ namespace CatNepNep
                         Console.WriteLine(@"Exporting " +output + @"...");
                         child.Stream.WriteTo(output);
                     }
+                    break;
+                case ".TXT":
+                    var convertTxt = new Binary2Po();
+                    nodoScript = nod.Transform(convertTxt);
+                    nodoScript?.Transform<Po2Binary, Po, BinaryFormat>().Stream.WriteTo(name + "_txt.po");
                     break;
                 default:
                     throw new FileNotSupported();
