@@ -137,7 +137,10 @@ namespace CatNepNep.BinFile
             };
             foreach (var entry in Po.Entries)
             {
-                writer.WriteLine("{" + (!string.IsNullOrEmpty(entry.Translated)?ReplaceText(entry.Translated):entry.Original) + "}\r\n");
+                writer.WriteLine("{" + (!string.IsNullOrEmpty(entry.Translated)?
+                                     (Dictionary != null)?ReplaceText(entry.Translated):
+                                        entry.Translated
+                                     :entry.Original) + "}\r\n");
             }
             return writer.Stream;
         }
