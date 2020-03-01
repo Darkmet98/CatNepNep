@@ -19,6 +19,7 @@
 using System;
 using System.IO;
 using CatNepNep.BinFile;
+using CatNepNep.BinFile.Common.Export;
 using CatNepNep.CatFile;
 using CatNepNep.Exceptions;
 using CatNepNep.TxtFile;
@@ -40,6 +41,18 @@ namespace CatNepNep
 
                 if (attr.HasFlag(FileAttributes.Directory)) Folders(args[0]);
                 else Files(args[0]);
+            }
+            else if (args.Length == 2)
+            {
+                switch (args[1])
+                {
+                    case "-common":
+                        BinCommons(args[0]);
+                        break;
+                    default:
+                        Info();
+                        break;
+                }
             }
             else Info();
         }
@@ -104,6 +117,26 @@ namespace CatNepNep
                     throw new FileNotSupported();
 
             }
+        }
+
+        private static void BinCommons(string file)
+        {
+            var nodo = NodeFactory.FromFile(file); //BinaryFormat
+            var name = Path.GetFileNameWithoutExtension(file);
+            Node nodPo;
+            Console.WriteLine(@"Exporting " + file + @"...");
+            IConverter<BinaryFormat, Po> nodeConverter = null;
+            switch (name)
+            {
+                //HyperDimension Neptunia U
+                case "QUEST":
+                    nodeConverter = new Binary2PoQuest();
+                    break;
+                default:
+                    throw new FileNotSupported();
+            }
+            var nodoPo = nodo.Transform(nodeConverter);
+            nodoPo?.Transform<Po2Binary, Po, BinaryFormat>().Stream.WriteTo(name + ".po");
         }
 
         private static void Info()

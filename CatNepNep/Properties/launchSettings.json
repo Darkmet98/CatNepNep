@@ -2,7 +2,7 @@
   "profiles": {
     "CATalunya": {
       "commandName": "Project",
-      "commandLineArgs": "adv000_1.TXT"
+      "commandLineArgs": "QUEST.bin -common"
     }
   }
 }
