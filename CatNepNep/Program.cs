@@ -18,13 +18,16 @@
 
 using System;
 using System.IO;
+using System.Text;
 using CatNepNep.BinFile;
 using CatNepNep.BinFile.Common.Export;
+using CatNepNep.BinFile.Common.Import;
 using CatNepNep.CatFile;
 using CatNepNep.Exceptions;
 using CatNepNep.TxtFile;
 using Yarhl.FileFormat;
 using Yarhl.FileSystem;
+using Yarhl.IO;
 using Yarhl.Media.Text;
 
 namespace CatNepNep
@@ -123,20 +126,56 @@ namespace CatNepNep
         {
             var nodo = NodeFactory.FromFile(file); //BinaryFormat
             var name = Path.GetFileNameWithoutExtension(file);
-            Node nodPo;
-            Console.WriteLine(@"Exporting " + file + @"...");
-            IConverter<BinaryFormat, Po> nodeConverter = null;
-            switch (name)
+
+            switch (Path.GetExtension(file).ToUpper())
             {
-                //HyperDimension Neptunia U
-                case "QUEST":
-                    nodeConverter = new Binary2PoQuest();
+                case ".BIN":
+                    
+                    Node nodPo;
+                    Console.WriteLine(@"Exporting " + file + @"...");
+                    IConverter<BinaryFormat, Po> nodeConverter = null;
+                    switch (name)
+                    {
+                        //HyperDimension Neptunia U
+                        case "QUEST":
+                            nodeConverter = new Binary2PoQuest();
+                            break;
+                        default:
+                            throw new FileNotSupported();
+                    }
+                    var nodoPo = nodo.Transform(nodeConverter);
+                    nodoPo?.Transform<Po2Binary, Po, BinaryFormat>().Stream.WriteTo(name + ".po");
                     break;
-                default:
-                    throw new FileNotSupported();
+                case ".PO":
+
+                    // Make sure that the shift-jis encoding is initialized in
+                    // .NET Core
+                    Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
+                    Node nodoOut;
+                    IConverter<Po, BinaryFormat> importer = null;
+                    Console.WriteLine(@"Importing " + name + @"...");
+                    switch (name)
+                    {
+                        //HyperDimension Neptunia U
+                        case "QUEST":
+                            importer = new Po2BinaryQuest()
+                            {
+                                OriginalFile = new DataReader(new DataStream(name + ".bin", FileOpenMode.Read))
+                                {
+                                    DefaultEncoding = Encoding.GetEncoding("shift_jis"),
+                                    Endianness = EndiannessMode.LittleEndian,
+                                }
+                            };
+                            nodo.Transform<Po2Binary, BinaryFormat, Po>();
+                            nodoOut = nodo.Transform(importer);
+                            nodoOut.Stream.WriteTo(name+"_new.bin");
+                    break;
+                        default:
+                            throw new FileNotSupported();
+                    }
+                    break;
             }
-            var nodoPo = nodo.Transform(nodeConverter);
-            nodoPo?.Transform<Po2Binary, Po, BinaryFormat>().Stream.WriteTo(name + ".po");
         }
 
         private static void Info()

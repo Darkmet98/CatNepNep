@@ -32,7 +32,7 @@ namespace CatNepNep.BinFile
     {
         private DataWriter Writer { get; set; }
         private Po Po { get; set; }
-        private Dictionary<string, string> Dictionary { get; set; }
+        public static Dictionary<string, string> Dictionary { get; set; }
         public BinaryFormat Convert(Po source)
         {
             // Make sure that the shift-jis encoding is initialized in
@@ -118,7 +118,7 @@ namespace CatNepNep.BinFile
             return ReplaceText(result);
         }
 
-        private string ReplaceText(string line)
+        public static string ReplaceText(string line)
         {
             string result = line;
             foreach (var replace in Dictionary)
@@ -145,7 +145,7 @@ namespace CatNepNep.BinFile
             return writer.Stream;
         }
 
-        public void GenerateDictionary(string file)
+        public static void GenerateDictionary(string file)
         {
             try
             {
