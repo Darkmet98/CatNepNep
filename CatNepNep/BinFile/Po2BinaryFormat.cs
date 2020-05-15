@@ -110,12 +110,12 @@ namespace CatNepNep.BinFile
 
         private string GetString(int position)
         {
-            var result = string.IsNullOrEmpty(Po.Entries[position].Translated) ?
-                Po.Entries[position].Original : Po.Entries[position].Translated;
+            var result = Po.Entries[position].Text;
 
-            if (Dictionary == null) return result != "<!null>" ? result : " ";
+            if (result == "<!null>")
+                return " ";
 
-            return ReplaceText(result);
+            return Dictionary == null ? result : ReplaceText(result);
         }
 
         public static string ReplaceText(string line)

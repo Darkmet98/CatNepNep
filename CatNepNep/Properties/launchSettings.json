@@ -2,7 +2,7 @@
   "profiles": {
     "CATalunya": {
       "commandName": "Project",
-      "commandLineArgs": "QUEST.po -common"
+      "commandLineArgs": "NAME.po"
     }
   }
 }
