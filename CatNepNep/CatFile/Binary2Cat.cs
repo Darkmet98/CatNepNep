@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2019 Pedro Garau Martínez
+﻿// Copyright (C) 2021 Pedro Garau Martínez
 //
 // This file is part of CatNepNep.
 //
@@ -33,10 +33,7 @@ namespace CatNepNep.CatFile
         public Cat Convert(BinaryFormat source)
         {
             Result = new Cat();
-            Reader = new DataReader(source.Stream)
-            {
-                Endianness = EndiannessMode.LittleEndian
-            };
+            Reader = new DataReader(source.Stream);
 
             Result.HeaderType = Reader.ReadUInt32(); //Read the Cat Type
             Result.HasNames = Reader.ReadUInt32(); //Read if has names
@@ -182,7 +179,7 @@ namespace CatNepNep.CatFile
 
             for (var i = 0; i < Result.NumberOfEntries; i++)
             {
-                Result.Names[i] = Reader.ReadString((int)Result.SizeNameChain, Encoding.UTF8).Replace("\0", "") + ".bin";
+                Result.Names[i] = $"{i}_{Reader.ReadString((int)Result.SizeNameChain).Replace("\0", "")}.bin";
             }
         }
 

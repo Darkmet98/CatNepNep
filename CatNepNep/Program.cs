@@ -24,6 +24,7 @@ using CatNepNep.BinFile.Common.Export;
 using CatNepNep.BinFile.Common.Import;
 using CatNepNep.CatFile;
 using CatNepNep.Exceptions;
+using CatNepNep.IfoFile;
 using CatNepNep.TxtFile;
 using Yarhl.FileFormat;
 using Yarhl.FileSystem;
@@ -115,6 +116,9 @@ namespace CatNepNep
                     var convertTxt = new Binary2Po();
                     nodoScript = nod.Transform(convertTxt);
                     nodoScript?.Transform<Po2Binary, Po, BinaryFormat>().Stream.WriteTo(name + "_txt.po");
+                    break;
+                case ".IFO":
+                    nod.Transform(new Binary2Ifo()).Transform(new Ifo2Po()).Transform<Po2Binary, Po, BinaryFormat>().Stream.WriteTo(name + ".po");
                     break;
                 default:
                     throw new FileNotSupported();
