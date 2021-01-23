@@ -38,9 +38,11 @@ namespace CatNepNep
         static void Main(string[] args)
         {
             Console.WriteLine(@"CatNepNep - A Neptunia spin offs toolkit for fan translations by Darkmet98. Version: 1.0");
+
             // Make sure that the shift-jis encoding is initialized in
             // .NET Core
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
             if (args.Length == 1 && !string.IsNullOrEmpty(args[0]))
             {
                 // get the file attributes for file or directory
@@ -55,6 +57,9 @@ namespace CatNepNep
                 {
                     case "-common":
                         BinCommons(args[0]);
+                        break;
+                    case "-dlc":
+                        BinDlc(args[0]);
                         break;
                     default:
                         Info();
@@ -129,6 +134,24 @@ namespace CatNepNep
                 default:
                     throw new FileNotSupported();
 
+            }
+        }
+
+        private static void BinDlc(string file)
+        {
+            var node = NodeFactory.FromFile(file);
+            var name = Path.GetFileNameWithoutExtension(file);
+
+            switch (Path.GetExtension(file).ToUpper())
+            {
+                case ".BIN":
+                    Console.WriteLine(@"Exporting " + file + @"...");
+                    node.Transform(new BinFile.Dlc.Binary2Po()).Transform<Po2Binary, Po, BinaryFormat>().Stream.WriteTo(name + ".po");
+                    break;
+                case ".PO":
+                    Console.WriteLine(@"Importing " + file + @"...");
+                    node.Transform<Po2Binary, BinaryFormat, Po>().Transform(new BinFile.Dlc.Po2Binary()).Stream.WriteTo(name + ".bin");
+                    break;
             }
         }
 
