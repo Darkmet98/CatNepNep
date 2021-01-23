@@ -115,7 +115,7 @@ namespace CatNepNep.BinFile
             if (result == "<!null>")
                 return " ";
 
-            return Dictionary == null ? result : ReplaceText(result);
+            return (Dictionary == null ? result : ReplaceText(result)).Replace("\\\\p", "\\p"); ;
         }
 
         public static string ReplaceText(string line)

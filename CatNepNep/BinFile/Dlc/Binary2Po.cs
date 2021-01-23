@@ -19,7 +19,7 @@ namespace CatNepNep.BinFile.Dlc
             {
                 Header = new PoHeader("Hyperdimension Neptunia", "dummy@dummy.com", currentCulture.Name)
                 {
-                    Extensions = { { "Type", "4" } }
+                    Extensions = { { "Type", "5" } }
                 },
             };
             reader = new DataReader(source.Stream)

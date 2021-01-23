@@ -101,7 +101,7 @@ namespace CatNepNep
                     nod.Transform<Po2Binary, BinaryFormat, Po>();
 
                     var type = Convert.ToInt32(nod.GetFormatAs<Po>().Header.Extensions["Type"]);
-                    if (type == 3)
+                    if (type == 4)
                         nod.Transform(new Po2Ifo()).Transform(new Ifo2Binary()).Stream.WriteTo(name + ".ifo");
                     else 
                         nod.Transform(new Po2BinaryFormat()).Stream.WriteTo(name.Contains("_txt") ? name.Replace("_txt", "")+"_new.TXT":name+"_new.bin");
