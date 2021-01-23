@@ -38,6 +38,7 @@ namespace CatNepNep.IfoFile
             po.Header.Extensions.Add("HeaderEntrySize", source.HeaderEntrySize.ToString());
             po.Header.Extensions.Add("TextEntryCount", source.TextEntryCount.ToString());
             po.Header.Extensions.Add("TextEntrySize", source.TextEntrySize.ToString());
+            po.Header.Extensions.Add("Type", "3");
 
             for (int i = 0; i < source.HeaderEntryCount; i++)
             {

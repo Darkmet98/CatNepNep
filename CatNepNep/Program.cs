@@ -38,6 +38,9 @@ namespace CatNepNep
         static void Main(string[] args)
         {
             Console.WriteLine(@"CatNepNep - A Neptunia spin offs toolkit for fan translations by Darkmet98. Version: 1.0");
+            // Make sure that the shift-jis encoding is initialized in
+            // .NET Core
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             if (args.Length == 1 && !string.IsNullOrEmpty(args[0]))
             {
                 // get the file attributes for file or directory
@@ -90,10 +93,13 @@ namespace CatNepNep
                     break;
 
                 case ".PO":
-                    var po = new Po2BinaryFormat();
                     nod.Transform<Po2Binary, BinaryFormat, Po>();
-                    nodPo = nod.Transform(po);
-                    nodPo.Stream.WriteTo(name.Contains("_txt") ? name.Replace("_txt", "")+"_new.TXT":name+"_new.bin");
+
+                    var type = Convert.ToInt32(nod.GetFormatAs<Po>().Header.Extensions["Type"]);
+                    if (type == 3)
+                        nod.Transform(new Po2Ifo()).Transform(new Ifo2Binary()).Stream.WriteTo(name + ".ifo");
+                    else 
+                        nod.Transform(new Po2BinaryFormat()).Stream.WriteTo(name.Contains("_txt") ? name.Replace("_txt", "")+"_new.TXT":name+"_new.bin");
                     break;
                 case ".CAT":
                     var cat = new Binary2Cat();
@@ -151,10 +157,6 @@ namespace CatNepNep
                     nodoPo?.Transform<Po2Binary, Po, BinaryFormat>().Stream.WriteTo(name + ".po");
                     break;
                 case ".PO":
-
-                    // Make sure that the shift-jis encoding is initialized in
-                    // .NET Core
-                    Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
                     Node nodoOut;
                     IConverter<Po, BinaryFormat> importer = null;
