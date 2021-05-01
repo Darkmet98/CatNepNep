@@ -12,4 +12,10 @@
     <PackageReference Include="Yarhl.Media" Version="2.0.0.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="ElfManipulator">
+      <HintPath>dll\ElfManipulator.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

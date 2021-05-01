@@ -29,6 +29,7 @@ namespace CatNepNep.CatFile
     {
         private Cat Result { get; set; }
         private DataReader Reader { get; set; }
+        public bool Legacy { get; set; }
 
         public Cat Convert(BinaryFormat source)
         {
@@ -179,7 +180,9 @@ namespace CatNepNep.CatFile
 
             for (var i = 0; i < Result.NumberOfEntries; i++)
             {
-                Result.Names[i] = $"{i}_{Reader.ReadString((int)Result.SizeNameChain).Replace("\0", "")}.bin";
+                Result.Names[i] = (Legacy)
+                    ? $"{Reader.ReadString((int)Result.SizeNameChain).Replace("\0", "")}.bin" 
+                    : $"{i}_{Reader.ReadString((int)Result.SizeNameChain).Replace("\0", "")}.bin";
             }
         }
 

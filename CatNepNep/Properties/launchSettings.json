@@ -2,7 +2,7 @@
   "profiles": {
     "CATalunya": {
       "commandName": "Project",
-      "commandLineArgs": "ACTIONNEPTUNIA04.ifo"
+      "commandLineArgs": "6_ADDTEXT.bin"
     }
   }
 }

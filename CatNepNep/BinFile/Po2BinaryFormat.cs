@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Reflection;
 using System.Text;
 using Yarhl.FileFormat;
 using Yarhl.IO;
@@ -38,8 +39,6 @@ namespace CatNepNep.BinFile
             // Make sure that the shift-jis encoding is initialized in
             // .NET Core
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-
-            if(File.Exists("Dictionary.map")) GenerateDictionary("Dictionary.map");
 
             Po = source;
             
@@ -115,7 +114,7 @@ namespace CatNepNep.BinFile
             if (result == "<!null>")
                 return " ";
 
-            return (Dictionary == null ? result : ReplaceText(result)).Replace("\\\\p", "\\p"); ;
+            return (Dictionary == null ? result : ReplaceText(result)).Replace("\\\\p", "\\p");
         }
 
         public static string ReplaceText(string line)
@@ -145,8 +144,13 @@ namespace CatNepNep.BinFile
             return writer.Stream;
         }
 
-        public static void GenerateDictionary(string file)
+        public static void GenerateDictionary()
         {
+            var file = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) +
+                      Path.DirectorySeparatorChar + "Dictionary.map";
+            if (!File.Exists(file))
+                throw new Exception("The dictionary file doesn't exist.");
+
             try
             {
                 Dictionary = new Dictionary<string, string>();

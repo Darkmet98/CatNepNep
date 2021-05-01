@@ -23,6 +23,7 @@ using CatNepNep.BinFile;
 using CatNepNep.BinFile.Common.Export;
 using CatNepNep.BinFile.Common.Import;
 using CatNepNep.CatFile;
+using CatNepNep.Elf;
 using CatNepNep.Exceptions;
 using CatNepNep.IfoFile;
 using CatNepNep.TxtFile;
@@ -43,30 +44,41 @@ namespace CatNepNep
             // .NET Core
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
-            if (args.Length == 1 && !string.IsNullOrEmpty(args[0]))
+            switch (args.Length)
             {
-                // get the file attributes for file or directory
-                FileAttributes attr = File.GetAttributes(@args[0]);
-
-                if (attr.HasFlag(FileAttributes.Directory)) Folders(args[0]);
-                else Files(args[0]);
-            }
-            else if (args.Length == 2)
-            {
-                switch (args[1])
+                case 1 when !string.IsNullOrEmpty(args[0]):
                 {
-                    case "-common":
-                        BinCommons(args[0]);
-                        break;
-                    case "-dlc":
-                        BinDlc(args[0]);
-                        break;
-                    default:
-                        Info();
-                        break;
+                    // get the file attributes for file or directory
+                    var attr = File.GetAttributes(@args[0]);
+
+                    if (attr.HasFlag(FileAttributes.Directory))
+                        Folders(args[0]);
+                    else
+                        Files(args[0]);
+                    break;
                 }
+                case 2:
+                    switch (args[1])
+                    {
+                        case "-common":
+                            BinCommons(args[0]);
+                            break;
+                        case "-dlc":
+                            BinDlc(args[0]);
+                            break;
+                        case "-legacy":
+                            Files(args[0], true);
+                            break;
+                        default:
+                            Info();
+                            break;
+                    }
+
+                    break;
+                default:
+                    Info();
+                    break;
             }
-            else Info();
         }
 
         private static void Folders(string folder)
@@ -78,8 +90,9 @@ namespace CatNepNep
 
         }
 
-        private static void Files(string file)
+        private static void Files(string file, bool legacy = false)
         {
+            Po2BinaryFormat.GenerateDictionary();
             var name = Path.GetFileNameWithoutExtension(file);
             var nod = NodeFactory.FromFile(file); //BinaryFormat
             Node nodPo;
@@ -107,16 +120,17 @@ namespace CatNepNep
                         nod.Transform(new Po2BinaryFormat()).Stream.WriteTo(name.Contains("_txt") ? name.Replace("_txt", "")+"_new.TXT":name+"_new.bin");
                     break;
                 case ".CAT":
-                    var cat = new Binary2Cat();
-                    var nodCat = nod.Transform(cat);
-                    
-                    var containerConverter = new Cat2NodeContainer();
-                    var nodContainer = nodCat.Transform(containerConverter);
-                    if (!Directory.Exists(name)) Directory.CreateDirectory(name ?? throw new Exception("That's not supposed to throw a exception lol, please make a issue if you read this line."));
-
-                    foreach (var child in Navigator.IterateNodes(nodContainer))
+                    nod.Transform(new Binary2Cat()
                     {
-                        if (child.Stream == null) continue;
+                        Legacy = legacy
+                    }).Transform(new Cat2NodeContainer());
+                    if (!Directory.Exists(name))
+                        Directory.CreateDirectory(name ?? throw new Exception("That's not supposed to throw a exception lol, please make a issue if you read this line."));
+
+                    foreach (var child in Navigator.IterateNodes(nod))
+                    {
+                        if (child.Stream == null)
+                            continue;
 
                         var output = Path.Combine(name + Path.DirectorySeparatorChar + child.Name);
                         Console.WriteLine(@"Exporting " +output + @"...");
@@ -124,12 +138,13 @@ namespace CatNepNep
                     }
                     break;
                 case ".TXT":
-                    var convertTxt = new Binary2Po();
-                    nodoScript = nod.Transform(convertTxt);
-                    nodoScript?.Transform<Po2Binary, Po, BinaryFormat>().Stream.WriteTo(name + "_txt.po");
+                    nod.Transform(new Binary2Po()).Transform<Po2Binary, Po, BinaryFormat>().Stream.WriteTo(name + "_txt.po");
                     break;
                 case ".IFO":
                     nod.Transform(new Binary2Ifo()).Transform(new Ifo2Po()).Transform<Po2Binary, Po, BinaryFormat>().Stream.WriteTo(name + ".po");
+                    break;
+                case ".EXE":
+                    var patch = new PatchExe(file);
                     break;
                 default:
                     throw new FileNotSupported();
@@ -139,6 +154,7 @@ namespace CatNepNep
 
         private static void BinDlc(string file)
         {
+            Po2BinaryFormat.GenerateDictionary();
             var node = NodeFactory.FromFile(file);
             var name = Path.GetFileNameWithoutExtension(file);
 
@@ -157,6 +173,7 @@ namespace CatNepNep
 
         private static void BinCommons(string file)
         {
+            Po2BinaryFormat.GenerateDictionary();
             var nodo = NodeFactory.FromFile(file); //BinaryFormat
             var name = Path.GetFileNameWithoutExtension(file);
 
@@ -164,7 +181,6 @@ namespace CatNepNep
             {
                 case ".BIN":
                     
-                    Node nodPo;
                     Console.WriteLine(@"Exporting " + file + @"...");
                     IConverter<BinaryFormat, Po> nodeConverter = null;
                     switch (name)

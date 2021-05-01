@@ -15,9 +15,6 @@ namespace CatNepNep.BinFile.Dlc
                 DefaultEncoding = Encoding.GetEncoding("shift_jis"),
             };
 
-            if (File.Exists("Dictionary.map"))
-                Po2BinaryFormat.GenerateDictionary("Dictionary.map");
-
             var entry = source.Entries[0];
             writer.Write(System.Convert.FromBase64String(entry.Context));
             writer.Write((Po2BinaryFormat.Dictionary != null) ? Po2BinaryFormat.ReplaceText(entry.Text) : entry.Text);

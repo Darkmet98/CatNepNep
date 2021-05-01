@@ -19,9 +19,6 @@ namespace CatNepNep.IfoFile
             };
             ifo = source;
 
-            if (File.Exists("Dictionary.map"))
-                Po2BinaryFormat.GenerateDictionary("Dictionary.map");
-
             WriteHeader();
             WriteContent();
 

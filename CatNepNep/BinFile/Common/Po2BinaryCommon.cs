@@ -33,8 +33,6 @@ namespace CatNepNep.BinFile.Common
 
         public BinaryFormat Convert(Po source)
         {
-            if (File.Exists("Dictionary.map"))
-                Po2BinaryFormat.GenerateDictionary("Dictionary.map");
 
             //Generate the new dat
             GenerateFile();
