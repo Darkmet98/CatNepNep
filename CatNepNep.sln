@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29613.14
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CatNepNep", "CatNepNep\CatNepNep.csproj", "{1847F33F-DF59-44D5-9822-43CE3D0AEC72}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CatNepNep", "CatNepNep\CatNepNep.csproj", "{1847F33F-DF59-44D5-9822-43CE3D0AEC72}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UniFont", "UniFont\UniFont.csproj", "{A9C70E73-1371-4D48-893D-FE3287CF0EC9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{1847F33F-DF59-44D5-9822-43CE3D0AEC72}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1847F33F-DF59-44D5-9822-43CE3D0AEC72}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1847F33F-DF59-44D5-9822-43CE3D0AEC72}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A9C70E73-1371-4D48-893D-FE3287CF0EC9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A9C70E73-1371-4D48-893D-FE3287CF0EC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A9C70E73-1371-4D48-893D-FE3287CF0EC9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9C70E73-1371-4D48-893D-FE3287CF0EC9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
