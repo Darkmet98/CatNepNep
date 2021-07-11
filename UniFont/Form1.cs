@@ -30,12 +30,14 @@ namespace UniFont
 
         private void button1_Click(object sender, EventArgs e)
         {
-            //0x5
-            stream = DataStreamFactory.FromFile("WIDTH.bin", FileOpenMode.ReadWrite);
+            var path = OpenFile();
+
+            if (string.IsNullOrWhiteSpace(path))
+                return;
+
+            stream = DataStreamFactory.FromFile(path, FileOpenMode.ReadWrite);
             var reader = new DataReader(stream) {Stream = {Position = 0x5}};
 
-
-            
             var yMod = y;
 
             for (int i = 0; i < rows; i++)
@@ -43,15 +45,17 @@ namespace UniFont
                 var xMod = x;
                 for (int j = 0; j < count; j++)
                 {
-                    textBoxes.Add(new TextBox()
+                    var textBox = new TextBox()
                     {
                         Location = new Point(xMod, yMod),
                         Size = new Size(49, 10),
                         Font = new Font(FontFamily.GenericSansSerif, 8),
                         Text = reader.ReadByte().ToString(),
-                        TextAlign = HorizontalAlignment.Center
+                        TextAlign = HorizontalAlignment.Center,
 
-                    });
+                    };
+                    textBox.KeyPress += KeyPressOnlyNumeric;
+                    textBoxes.Add(textBox);
                     xMod += xSpacing;
                 }
                 yMod += ySpacing;
@@ -70,7 +74,13 @@ namespace UniFont
                 MessageBox.Show("You need first to load the font before saving.", "Font not loaded", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 return;
             }
-            var writer = new DataWriter(stream) {Stream = {Position = 0x5}};
+
+            var path = SaveFile();
+
+            if (string.IsNullOrWhiteSpace(path))
+                return;
+
+            var writer = new DataWriter(CloneStrean()) {Stream = {Position = 0x5}};
             foreach (var box in textBoxes)
             {
                 var val = Convert.ToInt32(box.Text);
@@ -78,8 +88,46 @@ namespace UniFont
                     val = 255;
                 writer.Write(Convert.ToByte(val));
             }
-            stream.WriteTo("WIDTH_NEW.bin");
-            MessageBox.Show("Font updated", "blablabla", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            writer.Stream.WriteTo(path);
+            MessageBox.Show("The custom font has been saved.", "Font updated!", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private DataStream CloneStrean()
+        {
+            var newStream = DataStreamFactory.FromMemory();
+            stream.Position = 0;
+            stream.WriteTo(newStream);
+            return newStream;
+        }
+
+        private string OpenFile()
+        {
+            var openFileDialog = new OpenFileDialog
+            {
+                Filter = "WIDTH.bin|*.bin|All files (*.*)|*.*", RestoreDirectory = true
+            };
+
+            return openFileDialog.ShowDialog() == DialogResult.OK ? openFileDialog.FileName : string.Empty;
+        }
+
+
+        private string SaveFile()
+        {
+            var saveFileDialog1 = new SaveFileDialog
+            {
+                Filter = "WIDTH.bin|*.bin|All files (*.*)|*.*", RestoreDirectory = true
+            };
+
+
+            return saveFileDialog1.ShowDialog() == DialogResult.OK ? saveFileDialog1.FileName : string.Empty;
+        }
+
+        private void KeyPressOnlyNumeric(object sender, KeyPressEventArgs e)
+        {
+            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar))
+            {
+                e.Handled = true;
+            }
         }
     }
 }
