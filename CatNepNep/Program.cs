@@ -210,8 +210,8 @@ namespace CatNepNep
             Console.WriteLine(@"Usage: CatNepNep ""File/Folder""");
 
             Console.WriteLine(@"CAT Files");
-            Console.WriteLine(@"Export text.cat: CatNepNep ""text.cat""");
-            Console.WriteLine(@"Import Po to TALK.DAT: CatNepNep ""text""");
+            Console.WriteLine(@"Export cat: CatNepNep ""text.cat""");
+            Console.WriteLine(@"Import cat: CatNepNep ""text""");
 
             Console.WriteLine(@"Bin Files");
             Console.WriteLine(@"Export bin files to Po: CatNepNep ""NAMES.bin""");
